@@ -1,0 +1,10 @@
+{
+  "name": "std/url",
+  "version": "0.1.0",
+  "license": "ISC",
+  "dependencies": {
+    "std/blob": {
+      "path": "../blob"
+    }
+  }
+}
