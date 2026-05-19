@@ -1,5 +1,5 @@
 import { Assert } from "std/assert"
-import { parsePath, parseQueryParams } from "./index"
+import { parseAuthority, parsePath, parseQueryParams } from "./index"
 
 function isFailure<T, E>(result: Result<T, E>): bool {
   return case result {
@@ -49,6 +49,43 @@ export function testParsePathRejectsMalformedPercentEncoding(): void {
   Assert.isTrue(isFailure(parsePath("/bad/%zz")))
 }
 
+export function testParseAuthorityHostOnly(): void {
+  authority := try! parseAuthority("example.com")
+
+  Assert.isFalse(authority.hasUserinfo())
+  Assert.equal(authority.host, "example.com")
+  Assert.isFalse(authority.hasPort())
+}
+
+export function testParseAuthorityUserinfoHostAndPort(): void {
+  authority := try! parseAuthority("user%20name:pass@example.com:443")
+
+  Assert.equal(authority.userinfo!, "user name:pass")
+  Assert.equal(authority.host, "example.com")
+  Assert.equal(authority.port!, "443")
+}
+
+export function testParseAuthorityBracketedHostAndEmptyPort(): void {
+  authority := try! parseAuthority("[::1]:")
+
+  Assert.isFalse(authority.hasUserinfo())
+  Assert.equal(authority.host, "[::1]")
+  Assert.equal(authority.port!, "")
+}
+
+export function testParseAuthorityKeepsUnbracketedIpv6AsHost(): void {
+  authority := try! parseAuthority("2001:db8::1")
+
+  Assert.equal(authority.host, "2001:db8::1")
+  Assert.isFalse(authority.hasPort())
+}
+
+export function testParseAuthorityRejectsMalformedPercentEncodingAndBrackets(): void {
+  Assert.isTrue(isFailure(parseAuthority("bad%zz.example")))
+  Assert.isTrue(isFailure(parseAuthority("[::1")))
+  Assert.isTrue(isFailure(parseAuthority("[::1]extra")))
+}
+
 export function testParseEmptyQueryHasNoEntries(): void {
   params := try! parseQueryParams("")
 
@@ -59,7 +96,7 @@ export function testParseEmptyQueryHasNoEntries(): void {
 export function testParseQueryParamsPreservesOrderDuplicatesAndMissingValues(): void {
   params := try! parseQueryParams("tag=doof&flag&tag=stdlib&empty=&")
 
-  Assert.equal(params.size(), 5)
+  Assert.equal(params.size(), 4)
   Assert.equal(params.entries[0].name, "tag")
   Assert.equal(params.entries[0].value!, "doof")
   Assert.equal(params.entries[1].name, "flag")
@@ -68,8 +105,35 @@ export function testParseQueryParamsPreservesOrderDuplicatesAndMissingValues(): 
   Assert.equal(params.entries[2].value!, "stdlib")
   Assert.equal(params.entries[3].name, "empty")
   Assert.equal(params.entries[3].value!, "")
-  Assert.equal(params.entries[4].name, "")
-  Assert.isFalse(params.entries[4].hasValue())
+}
+
+export function testParseQueryParamsDiscardsEmptyEntries(): void {
+  empty := try! parseQueryParams("&")
+  params := try! parseQueryParams("a=1&&b=2&")
+
+  Assert.equal(empty.size(), 0)
+  Assert.equal(params.size(), 2)
+  Assert.equal(params.entries[0].name, "a")
+  Assert.equal(params.entries[0].value!, "1")
+  Assert.equal(params.entries[1].name, "b")
+  Assert.equal(params.entries[1].value!, "2")
+}
+
+export function testParseQueryParamsKeepsEmptyNamesAndValues(): void {
+  missingValue := try! parseQueryParams("a")
+  emptyValue := try! parseQueryParams("a=")
+  emptyName := try! parseQueryParams("=x")
+  emptyNameAndValue := try! parseQueryParams("=")
+
+  Assert.equal(missingValue.size(), 1)
+  Assert.equal(missingValue.entries[0].name, "a")
+  Assert.isFalse(missingValue.entries[0].hasValue())
+  Assert.equal(emptyValue.entries[0].name, "a")
+  Assert.equal(emptyValue.entries[0].value!, "")
+  Assert.equal(emptyName.entries[0].name, "")
+  Assert.equal(emptyName.entries[0].value!, "x")
+  Assert.equal(emptyNameAndValue.entries[0].name, "")
+  Assert.equal(emptyNameAndValue.entries[0].value!, "")
 }
 
 export function testParseQueryParamsDecodesNamesValuesAndPlus(): void {

@@ -5,7 +5,7 @@ Minimal, lossless URL component parsing utilities.
 ## Usage
 
 ```doof
-import { parsePath, parseQueryParams } from "std/url"
+import { parseAuthority, parsePath, parseQueryParams } from "std/url"
 
 path := try! parsePath("/api//v1/")
 // absolute: true
@@ -13,6 +13,9 @@ path := try! parsePath("/api//v1/")
 
 query := try! parseQueryParams("tag=doof&flag&tag=stdlib")
 // preserves order, duplicate names, and the difference between `flag` and `flag=`
+
+authority := try! parseAuthority("user@example.com:443")
+// userinfo: "user", host: "example.com", port: "443"
 ```
 
 ## Exports
@@ -23,11 +26,44 @@ Parse a URL path component into decoded path segments while preserving interior
 and trailing empty segments and whether the input started with `/`. A leading
 `/` is represented by `absolute`, not by an extra leading empty segment.
 
+#### Empty paths, root paths, and trailing slashes
+
+`Path` distinguishes an empty path from the absolute root path.
+
+| input | absolute | segments | meaning |
+|---|---:|---|---|
+| `""` | `false` | `[]` | empty path / no path |
+| `"foo"` | `false` | `["foo"]` | relative path |
+| `"/"` | `true` | `[""]` | absolute root path |
+| `"/foo"` | `true` | `["foo"]` | absolute path to `foo` |
+| `"/foo/"` | `true` | `["foo", ""]` | absolute path with trailing slash |
+| `"/foo//bar"` | `true` | `["foo", "", "bar"]` | preserves empty interior segment |
+
 #### `parseQueryParams(text: string): Result<QueryParams, UrlError>`
 
 Parse a URL query string into ordered entries. Query names and values decode
 percent escapes, and `+` decodes to a space. Entries without `=` preserve a
-missing value as `null`.
+missing value as `null`. Empty entries from leading, trailing, or repeated `&`
+are discarded.
+
+| input | params |
+|---|---|
+| `""` | `[]` |
+| `"&"` | `[]` |
+| `"a"` | `[("a", null)]` |
+| `"a="` | `[("a", "")]` |
+| `"=x"` | `[("", "x")]` |
+| `"="` | `[("", "")]` |
+| `"a=1&b=2"` | `[("a", "1"), ("b", "2")]` |
+| `"a=1&&b=2&"` | `[("a", "1"), ("b", "2")]` |
+
+#### `parseAuthority(text: string): Result<Authority, UrlError>`
+
+Parse a URL authority component into decoded `userinfo`, `host`, and `port`
+parts. `userinfo` and `port` are `null` when absent. Empty parts are preserved
+when their separator is present, so `example.com:` has an empty port. Bracketed
+hosts are kept bracketed, e.g. `[::1]:443` parses as host `[::1]` and port
+`443`.
 
 #### `Path`
 
@@ -36,6 +72,14 @@ missing value as `null`.
 - `isEmpty(): bool`
 - `segmentCount(): int`
 - `segment(index: int): string`
+
+#### `Authority`
+
+- `userinfo: string | null`
+- `host: string`
+- `port: string | null`
+- `hasUserinfo(): bool`
+- `hasPort(): bool`
 
 #### `QueryParam`
 
@@ -54,7 +98,7 @@ missing value as `null`.
 
 #### `UrlError`
 
-Currently reports malformed percent escapes with:
+Currently reports malformed percent escapes and malformed authority syntax with:
 
 - `kind: string`
 - `index: int`
