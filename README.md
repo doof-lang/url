@@ -2,6 +2,16 @@
 
 Minimal, lossless URL component parsing utilities.
 
+## Documentation
+
+- [Guide and API reference](docs/API.md) explains component parsing, percent decoding, preservation rules, and error reporting.
+- Tests can be run with `doof test url`.
+
+`std/url` is for parsing already-split URL components. It does not resolve full
+URLs, normalize paths, canonicalize hosts, or rebuild URLs. The parsers preserve
+details such as duplicate query parameters, missing query values, trailing path
+slashes, and empty authority ports.
+
 ## Usage
 
 ```doof
@@ -18,6 +28,9 @@ authority := try! parseAuthority("user@example.com:443")
 // userinfo: "user", host: "example.com", port: "443"
 ```
 
+Percent escapes are decoded by every parser. Query parsing also decodes `+` as a
+space; path and authority parsing keep `+` as a literal plus sign.
+
 ## Exports
 
 #### `parsePath(text: string): Result<Path, UrlError>`
@@ -25,6 +38,8 @@ authority := try! parseAuthority("user@example.com:443")
 Parse a URL path component into decoded path segments while preserving interior
 and trailing empty segments and whether the input started with `/`. A leading
 `/` is represented by `absolute`, not by an extra leading empty segment.
+The parser does not resolve `.` or `..`, and a decoded `%2F` stays inside the
+segment where it appeared.
 
 #### Empty paths, root paths, and trailing slashes
 
@@ -64,6 +79,9 @@ parts. `userinfo` and `port` are `null` when absent. Empty parts are preserved
 when their separator is present, so `example.com:` has an empty port. Bracketed
 hosts are kept bracketed, e.g. `[::1]:443` parses as host `[::1]` and port
 `443`.
+
+When userinfo is present, the last `@` separates it from the host and port.
+Unbracketed hosts with multiple `:` characters are treated as host-only text.
 
 #### `Path`
 
