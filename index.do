@@ -18,20 +18,20 @@ export class Path {
 }
 
 export class Authority {
-  readonly userinfo: string | null
+  readonly userinfo: string | none
   readonly host: string
-  readonly port: string | null
+  readonly port: string | none
 
-  hasUserinfo(): bool => this.userinfo != null
+  hasUserinfo(): bool => this.userinfo != none
 
-  hasPort(): bool => this.port != null
+  hasPort(): bool => this.port != none
 }
 
 export class QueryParam {
   readonly name: string
-  readonly value: string | null
+  readonly value: string | none
 
-  hasValue(): bool => this.value != null
+  hasValue(): bool => this.value != none
 }
 
 export class QueryParams {
@@ -50,13 +50,13 @@ export class QueryParams {
     return false
   }
 
-  first(name: string): QueryParam | null {
+  first(name: string): QueryParam | none {
     for entry of this.entries {
       if entry.name == name {
         return entry
       }
     }
-    return null
+    return none
   }
 
   all(name: string): readonly QueryParam[] {
@@ -99,7 +99,7 @@ export function parsePath(text: string): Result<Path, UrlError> {
 }
 
 export function parseAuthority(text: string): Result<Authority, UrlError> {
-  let userinfo: string | null = null
+  let userinfo: string | none = none
   let hostPort = text
   atIndex := findLastChar(text, '@')
 
@@ -110,7 +110,7 @@ export function parseAuthority(text: string): Result<Authority, UrlError> {
   }
 
   let hostText = hostPort
-  let port: string | null = null
+  let port: string | none = none
 
   if hostPort.startsWith("[") {
     closeIndex := findChar(hostPort, ']')
@@ -164,7 +164,7 @@ export function parseQueryParams(text: string): Result<QueryParams, UrlError> {
     separator := rawEntry.indexOf("=")
     if separator < 0 {
       try name := decodeComponent(rawEntry, true)
-      entries.push(QueryParam { name, value: null })
+      entries.push(QueryParam { name, value: none })
       continue
     }
 

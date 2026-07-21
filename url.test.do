@@ -8,7 +8,7 @@ function isFailure<T, E>(result: Result<T, E>): bool {
   }
 }
 
-export function testParseEmptyPathHasNoSegments(): void {
+export function testParseEmptyPathHasNoSegments(): none {
   path := try! parsePath("")
 
   Assert.isFalse(path.absolute)
@@ -16,7 +16,7 @@ export function testParseEmptyPathHasNoSegments(): void {
   Assert.equal(path.segmentCount(), 0)
 }
 
-export function testParsePathPreservesEmptySegments(): void {
+export function testParsePathPreservesEmptySegments(): none {
   path := try! parsePath("/api//v1/")
 
   Assert.isTrue(path.absolute)
@@ -27,7 +27,7 @@ export function testParsePathPreservesEmptySegments(): void {
   Assert.equal(path.segment(3), "")
 }
 
-export function testParseAbsoluteRootPathHasOnlyTrailingEmptySegment(): void {
+export function testParseAbsoluteRootPathHasOnlyTrailingEmptySegment(): none {
   path := try! parsePath("/")
 
   Assert.isTrue(path.absolute)
@@ -35,7 +35,7 @@ export function testParseAbsoluteRootPathHasOnlyTrailingEmptySegment(): void {
   Assert.equal(path.segment(0), "")
 }
 
-export function testParsePathDecodesPercentEncodingWithoutTreatingPlusAsSpace(): void {
+export function testParsePathDecodesPercentEncodingWithoutTreatingPlusAsSpace(): none {
   path := try! parsePath("/hello%20world/a+b/%2F")
 
   Assert.equal(path.segment(0), "hello world")
@@ -43,13 +43,13 @@ export function testParsePathDecodesPercentEncodingWithoutTreatingPlusAsSpace():
   Assert.equal(path.segment(2), "/")
 }
 
-export function testParsePathRejectsMalformedPercentEncoding(): void {
+export function testParsePathRejectsMalformedPercentEncoding(): none {
   Assert.isTrue(isFailure(parsePath("/bad/%")))
   Assert.isTrue(isFailure(parsePath("/bad/%2")))
   Assert.isTrue(isFailure(parsePath("/bad/%zz")))
 }
 
-export function testParseAuthorityHostOnly(): void {
+export function testParseAuthorityHostOnly(): none {
   authority := try! parseAuthority("example.com")
 
   Assert.isFalse(authority.hasUserinfo())
@@ -57,7 +57,7 @@ export function testParseAuthorityHostOnly(): void {
   Assert.isFalse(authority.hasPort())
 }
 
-export function testParseAuthorityUserinfoHostAndPort(): void {
+export function testParseAuthorityUserinfoHostAndPort(): none {
   authority := try! parseAuthority("user%20name:pass@example.com:443")
 
   Assert.equal(authority.userinfo!, "user name:pass")
@@ -65,7 +65,7 @@ export function testParseAuthorityUserinfoHostAndPort(): void {
   Assert.equal(authority.port!, "443")
 }
 
-export function testParseAuthorityBracketedHostAndEmptyPort(): void {
+export function testParseAuthorityBracketedHostAndEmptyPort(): none {
   authority := try! parseAuthority("[::1]:")
 
   Assert.isFalse(authority.hasUserinfo())
@@ -73,27 +73,27 @@ export function testParseAuthorityBracketedHostAndEmptyPort(): void {
   Assert.equal(authority.port!, "")
 }
 
-export function testParseAuthorityKeepsUnbracketedIpv6AsHost(): void {
+export function testParseAuthorityKeepsUnbracketedIpv6AsHost(): none {
   authority := try! parseAuthority("2001:db8::1")
 
   Assert.equal(authority.host, "2001:db8::1")
   Assert.isFalse(authority.hasPort())
 }
 
-export function testParseAuthorityRejectsMalformedPercentEncodingAndBrackets(): void {
+export function testParseAuthorityRejectsMalformedPercentEncodingAndBrackets(): none {
   Assert.isTrue(isFailure(parseAuthority("bad%zz.example")))
   Assert.isTrue(isFailure(parseAuthority("[::1")))
   Assert.isTrue(isFailure(parseAuthority("[::1]extra")))
 }
 
-export function testParseEmptyQueryHasNoEntries(): void {
+export function testParseEmptyQueryHasNoEntries(): none {
   params := try! parseQueryParams("")
 
   Assert.isTrue(params.isEmpty())
   Assert.equal(params.size(), 0)
 }
 
-export function testParseQueryParamsPreservesOrderDuplicatesAndMissingValues(): void {
+export function testParseQueryParamsPreservesOrderDuplicatesAndMissingValues(): none {
   params := try! parseQueryParams("tag=doof&flag&tag=stdlib&empty=&")
 
   Assert.equal(params.size(), 4)
@@ -107,7 +107,7 @@ export function testParseQueryParamsPreservesOrderDuplicatesAndMissingValues(): 
   Assert.equal(params.entries[3].value!, "")
 }
 
-export function testParseQueryParamsDiscardsEmptyEntries(): void {
+export function testParseQueryParamsDiscardsEmptyEntries(): none {
   empty := try! parseQueryParams("&")
   params := try! parseQueryParams("a=1&&b=2&")
 
@@ -119,7 +119,7 @@ export function testParseQueryParamsDiscardsEmptyEntries(): void {
   Assert.equal(params.entries[1].value!, "2")
 }
 
-export function testParseQueryParamsKeepsEmptyNamesAndValues(): void {
+export function testParseQueryParamsKeepsEmptyNamesAndValues(): none {
   missingValue := try! parseQueryParams("a")
   emptyValue := try! parseQueryParams("a=")
   emptyName := try! parseQueryParams("=x")
@@ -136,7 +136,7 @@ export function testParseQueryParamsKeepsEmptyNamesAndValues(): void {
   Assert.equal(emptyNameAndValue.entries[0].value!, "")
 }
 
-export function testParseQueryParamsDecodesNamesValuesAndPlus(): void {
+export function testParseQueryParamsDecodesNamesValuesAndPlus(): none {
   params := try! parseQueryParams("hello+world=one%20two&encoded%2Bkey=%2B")
 
   Assert.equal(params.entries[0].name, "hello world")
@@ -145,7 +145,7 @@ export function testParseQueryParamsDecodesNamesValuesAndPlus(): void {
   Assert.equal(params.entries[1].value!, "+")
 }
 
-export function testQueryParamsConvenienceMethodsRemainLossless(): void {
+export function testQueryParamsConvenienceMethodsRemainLossless(): none {
   params := try! parseQueryParams("tag=doof&flag&tag=stdlib")
   firstTag := params.first("tag")
   allTags := params.all("tag")
@@ -158,7 +158,7 @@ export function testQueryParamsConvenienceMethodsRemainLossless(): void {
   Assert.equal(allTags[1].value!, "stdlib")
 }
 
-export function testParseQueryParamsRejectsMalformedPercentEncoding(): void {
+export function testParseQueryParamsRejectsMalformedPercentEncoding(): none {
   Assert.isTrue(isFailure(parseQueryParams("bad=%")))
   Assert.isTrue(isFailure(parseQueryParams("bad=%2")))
   Assert.isTrue(isFailure(parseQueryParams("bad=%zz")))
