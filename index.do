@@ -66,7 +66,7 @@ export class QueryParams {
         matches.push(entry)
       }
     }
-    return matches.buildReadonly()
+    return matches.drainToReadonly()
   }
 }
 
@@ -93,7 +93,7 @@ export function parsePath(text: string): Result<Path, UrlError> {
   return Success {
     value: Path {
       absolute: text.startsWith("/"),
-      segments: segments.buildReadonly(),
+      segments: segments.drainToReadonly(),
     }
   }
 }
@@ -175,7 +175,7 @@ export function parseQueryParams(text: string): Result<QueryParams, UrlError> {
 
   return Success {
     value: QueryParams {
-      entries: entries.buildReadonly(),
+      entries: entries.drainToReadonly(),
     }
   }
 }
