@@ -11,6 +11,10 @@ URL back together. Those operations can be layered on top when a caller wants
 them, but the parsers here preserve the component details that would otherwise
 be easy to lose.
 
+The module also includes RFC 3492 Punycode label codecs and dot-separated
+hostname conversion helpers. They deliberately do not implement IDNA or UTS
+#46 processing.
+
 ## Quick Start
 
 ```doof
@@ -290,11 +294,29 @@ export function parsePath(text: string): Result<Path, UrlError>
 export function parseAuthority(text: string): Result<Authority, UrlError>
 export function parseQueryParams(text: string): Result<QueryParams, UrlError>
 
+export function encodePunycodeLabel(text: string): Result<string, PunycodeError>
+export function decodePunycodeLabel(text: string): Result<string, PunycodeError>
+export function hostnameToAscii(hostname: string): Result<string, PunycodeError>
+export function hostnameToUnicode(hostname: string): Result<string, PunycodeError>
+
 export class UrlError
+export class PunycodeError
 export class Path
 export class Authority
 export class QueryParam
 export class QueryParams
 ```
 
-All declarations are defined in [index.do](../index.do).
+The raw Punycode functions do not add or remove `xn--`. The hostname helpers
+split only on `.`, add the prefix when encoding non-ASCII labels, and decode
+labels with a case-insensitive prefix. Empty labels, trailing dots, ASCII case,
+and bracketed IP literals are preserved.
+
+`PunycodeError` exposes `kind`, byte `index`, and `message`. Its stable kinds
+are `invalid-utf8`, `invalid-punycode`, and `overflow`.
+
+No Unicode normalization, case folding, UTS #46 mapping, character policy,
+bidirectional/context validation, DNS length validation, or Unicode-dot mapping
+is performed.
+
+The public declarations are exported from [index.do](../index.do).

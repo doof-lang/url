@@ -1,5 +1,17 @@
 import { BlobBuilder, BlobReader } from "std/blob"
 
+export {
+  decodePunycodeLabel,
+  encodePunycodeLabel,
+} from "./punycode"
+
+export {
+  hostnameToAscii,
+  hostnameToUnicode,
+} from "./hostname"
+
+export { PunycodeError } from "./punycode_error"
+
 export class UrlError {
   readonly kind: string
   readonly index: int

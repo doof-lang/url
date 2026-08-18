@@ -12,6 +12,9 @@ URLs, normalize paths, canonicalize hosts, or rebuild URLs. The parsers preserve
 details such as duplicate query parameters, missing query values, trailing path
 slashes, and empty authority ports.
 
+The module also provides RFC 3492 Punycode codecs and hostname helpers. These
+helpers are intentionally not a full IDNA implementation.
+
 ## Usage
 
 ```doof
@@ -30,6 +33,31 @@ authority := try! parseAuthority("user@example.com:443")
 
 Percent escapes are decoded by every parser. Query parsing also decodes `+` as a
 space; path and authority parsing keep `+` as a literal plus sign.
+
+## Punycode and internationalized hostnames
+
+`encodePunycodeLabel` and `decodePunycodeLabel` operate on raw RFC 3492 label
+payloads without adding or removing `xn--`. `hostnameToAscii` and
+`hostnameToUnicode` apply that codec to dot-separated hostname labels:
+
+```doof
+import { hostnameToAscii, hostnameToUnicode } from "std/url"
+
+ascii := try! hostnameToAscii("例え.テスト")
+// "xn--r8jz45g.xn--zckzah"
+
+unicode := try! hostnameToUnicode(ascii)
+// "例え.テスト"
+```
+
+Empty labels, trailing dots, ASCII label case, and bracketed IP literals are
+preserved. Only the ASCII full stop (`.`) separates hostname labels.
+
+This is Punycode support, not IDNA processing. It does not perform Unicode
+normalization, case folding, UTS #46 mapping, prohibited-character checks,
+bidirectional or contextual rules, DNS length validation, or Unicode-dot
+mapping. Failures return `PunycodeError` with `invalid-utf8`,
+`invalid-punycode`, or `overflow` as the error kind.
 
 ## Exports
 
