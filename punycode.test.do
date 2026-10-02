@@ -17,46 +17,46 @@ function assertErrorKind(result: Result<string, PunycodeError>, kind: string): n
 }
 
 export function testPunycodeRfcVectors(): none {
-  Assert.equal(try! encodePunycodeLabel("bücher"), "bcher-kva")
-  Assert.equal(try! decodePunycodeLabel("bcher-kva"), "bücher")
-  Assert.equal(try! encodePunycodeLabel("mañana"), "maana-pta")
-  Assert.equal(try! decodePunycodeLabel("maana-pta"), "mañana")
-  Assert.equal(try! encodePunycodeLabel("😀"), "e28h")
-  Assert.equal(try! decodePunycodeLabel("e28h"), "😀")
+  Assert.equal(encodePunycodeLabel("bücher")!, "bcher-kva")
+  Assert.equal(decodePunycodeLabel("bcher-kva")!, "bücher")
+  Assert.equal(encodePunycodeLabel("mañana")!, "maana-pta")
+  Assert.equal(decodePunycodeLabel("maana-pta")!, "mañana")
+  Assert.equal(encodePunycodeLabel("😀")!, "e28h")
+  Assert.equal(decodePunycodeLabel("e28h")!, "😀")
 }
 
 export function testPunycodePreservesBasicCodepointsAndCase(): none {
-  Assert.equal(try! encodePunycodeLabel("abc"), "abc-")
-  Assert.equal(try! decodePunycodeLabel("abc-"), "abc")
-  Assert.equal(try! encodePunycodeLabel("Bücher"), "Bcher-kva")
-  Assert.equal(try! decodePunycodeLabel("Bcher-kva"), "Bücher")
+  Assert.equal(encodePunycodeLabel("abc")!, "abc-")
+  Assert.equal(decodePunycodeLabel("abc-")!, "abc")
+  Assert.equal(encodePunycodeLabel("Bücher")!, "Bcher-kva")
+  Assert.equal(decodePunycodeLabel("Bcher-kva")!, "Bücher")
 }
 
 export function testPunycodeRoundTripsMixedAndAstralText(): none {
   labels := readonly ["", "hello", "☃-⌘", "Go-例", "😀rocket🚀"]
   for label of labels {
-    encoded := try! encodePunycodeLabel(label)
-    Assert.equal(try! decodePunycodeLabel(encoded), label)
+    encoded := encodePunycodeLabel(label)!
+    Assert.equal(decodePunycodeLabel(encoded)!, label)
   }
 }
 
 export function testHostnameConversionHandlesLabelsAndTrailingDots(): none {
-  Assert.equal(try! hostnameToAscii("例え.テスト"), "xn--r8jz45g.xn--zckzah")
-  Assert.equal(try! hostnameToUnicode("xn--r8jz45g.xn--zckzah"), "例え.テスト")
-  Assert.equal(try! hostnameToAscii("www.例え.."), "www.xn--r8jz45g..")
-  Assert.equal(try! hostnameToUnicode("www.xn--r8jz45g.."), "www.例え..")
+  Assert.equal(hostnameToAscii("例え.テスト")!, "xn--r8jz45g.xn--zckzah")
+  Assert.equal(hostnameToUnicode("xn--r8jz45g.xn--zckzah")!, "例え.テスト")
+  Assert.equal(hostnameToAscii("www.例え..")!, "www.xn--r8jz45g..")
+  Assert.equal(hostnameToUnicode("www.xn--r8jz45g..")!, "www.例え..")
 }
 
 export function testHostnameToAsciiPreservesAsciiAndIpLiterals(): none {
-  Assert.equal(try! hostnameToAscii("Example.COM"), "Example.COM")
-  Assert.equal(try! hostnameToAscii("xn--r8jz45g.example"), "xn--r8jz45g.example")
-  Assert.equal(try! hostnameToAscii("127.0.0.1"), "127.0.0.1")
-  Assert.equal(try! hostnameToAscii("[2001:db8::1]"), "[2001:db8::1]")
-  Assert.equal(try! hostnameToUnicode("[2001:db8::1]"), "[2001:db8::1]")
+  Assert.equal(hostnameToAscii("Example.COM")!, "Example.COM")
+  Assert.equal(hostnameToAscii("xn--r8jz45g.example")!, "xn--r8jz45g.example")
+  Assert.equal(hostnameToAscii("127.0.0.1")!, "127.0.0.1")
+  Assert.equal(hostnameToAscii("[2001:db8::1]")!, "[2001:db8::1]")
+  Assert.equal(hostnameToUnicode("[2001:db8::1]")!, "[2001:db8::1]")
 }
 
 export function testHostnameToUnicodeAcceptsCaseInsensitivePrefix(): none {
-  Assert.equal(try! hostnameToUnicode("XN--R8JZ45G.example"), "例え.example")
+  Assert.equal(hostnameToUnicode("XN--R8JZ45G.example")!, "例え.example")
 }
 
 export function testPunycodeRejectsMalformedUtf8DigitsAndOverflow(): none {

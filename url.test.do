@@ -9,7 +9,7 @@ function isFailure<T, E>(result: Result<T, E>): bool {
 }
 
 export function testParseEmptyPathHasNoSegments(): none {
-  path := try! parsePath("")
+  path := parsePath("")!
 
   Assert.isFalse(path.absolute)
   Assert.isTrue(path.isEmpty())
@@ -17,7 +17,7 @@ export function testParseEmptyPathHasNoSegments(): none {
 }
 
 export function testParsePathPreservesEmptySegments(): none {
-  path := try! parsePath("/api//v1/")
+  path := parsePath("/api//v1/")!
 
   Assert.isTrue(path.absolute)
   Assert.equal(path.segmentCount(), 4)
@@ -28,7 +28,7 @@ export function testParsePathPreservesEmptySegments(): none {
 }
 
 export function testParseAbsoluteRootPathHasOnlyTrailingEmptySegment(): none {
-  path := try! parsePath("/")
+  path := parsePath("/")!
 
   Assert.isTrue(path.absolute)
   Assert.equal(path.segmentCount(), 1)
@@ -36,7 +36,7 @@ export function testParseAbsoluteRootPathHasOnlyTrailingEmptySegment(): none {
 }
 
 export function testParsePathDecodesPercentEncodingWithoutTreatingPlusAsSpace(): none {
-  path := try! parsePath("/hello%20world/a+b/%2F")
+  path := parsePath("/hello%20world/a+b/%2F")!
 
   Assert.equal(path.segment(0), "hello world")
   Assert.equal(path.segment(1), "a+b")
@@ -50,7 +50,7 @@ export function testParsePathRejectsMalformedPercentEncoding(): none {
 }
 
 export function testParseAuthorityHostOnly(): none {
-  authority := try! parseAuthority("example.com")
+  authority := parseAuthority("example.com")!
 
   Assert.isFalse(authority.hasUserinfo())
   Assert.equal(authority.host, "example.com")
@@ -58,7 +58,7 @@ export function testParseAuthorityHostOnly(): none {
 }
 
 export function testParseAuthorityUserinfoHostAndPort(): none {
-  authority := try! parseAuthority("user%20name:pass@example.com:443")
+  authority := parseAuthority("user%20name:pass@example.com:443")!
 
   Assert.equal(authority.userinfo!, "user name:pass")
   Assert.equal(authority.host, "example.com")
@@ -66,7 +66,7 @@ export function testParseAuthorityUserinfoHostAndPort(): none {
 }
 
 export function testParseAuthorityBracketedHostAndEmptyPort(): none {
-  authority := try! parseAuthority("[::1]:")
+  authority := parseAuthority("[::1]:")!
 
   Assert.isFalse(authority.hasUserinfo())
   Assert.equal(authority.host, "[::1]")
@@ -74,7 +74,7 @@ export function testParseAuthorityBracketedHostAndEmptyPort(): none {
 }
 
 export function testParseAuthorityKeepsUnbracketedIpv6AsHost(): none {
-  authority := try! parseAuthority("2001:db8::1")
+  authority := parseAuthority("2001:db8::1")!
 
   Assert.equal(authority.host, "2001:db8::1")
   Assert.isFalse(authority.hasPort())
@@ -87,14 +87,14 @@ export function testParseAuthorityRejectsMalformedPercentEncodingAndBrackets(): 
 }
 
 export function testParseEmptyQueryHasNoEntries(): none {
-  params := try! parseQueryParams("")
+  params := parseQueryParams("")!
 
   Assert.isTrue(params.isEmpty())
   Assert.equal(params.size(), 0)
 }
 
 export function testParseQueryParamsPreservesOrderDuplicatesAndMissingValues(): none {
-  params := try! parseQueryParams("tag=doof&flag&tag=stdlib&empty=&")
+  params := parseQueryParams("tag=doof&flag&tag=stdlib&empty=&")!
 
   Assert.equal(params.size(), 4)
   Assert.equal(params.entries[0].name, "tag")
@@ -108,8 +108,8 @@ export function testParseQueryParamsPreservesOrderDuplicatesAndMissingValues(): 
 }
 
 export function testParseQueryParamsDiscardsEmptyEntries(): none {
-  empty := try! parseQueryParams("&")
-  params := try! parseQueryParams("a=1&&b=2&")
+  empty := parseQueryParams("&")!
+  params := parseQueryParams("a=1&&b=2&")!
 
   Assert.equal(empty.size(), 0)
   Assert.equal(params.size(), 2)
@@ -120,10 +120,10 @@ export function testParseQueryParamsDiscardsEmptyEntries(): none {
 }
 
 export function testParseQueryParamsKeepsEmptyNamesAndValues(): none {
-  missingValue := try! parseQueryParams("a")
-  emptyValue := try! parseQueryParams("a=")
-  emptyName := try! parseQueryParams("=x")
-  emptyNameAndValue := try! parseQueryParams("=")
+  missingValue := parseQueryParams("a")!
+  emptyValue := parseQueryParams("a=")!
+  emptyName := parseQueryParams("=x")!
+  emptyNameAndValue := parseQueryParams("=")!
 
   Assert.equal(missingValue.size(), 1)
   Assert.equal(missingValue.entries[0].name, "a")
@@ -137,7 +137,7 @@ export function testParseQueryParamsKeepsEmptyNamesAndValues(): none {
 }
 
 export function testParseQueryParamsDecodesNamesValuesAndPlus(): none {
-  params := try! parseQueryParams("hello+world=one%20two&encoded%2Bkey=%2B")
+  params := parseQueryParams("hello+world=one%20two&encoded%2Bkey=%2B")!
 
   Assert.equal(params.entries[0].name, "hello world")
   Assert.equal(params.entries[0].value!, "one two")
@@ -146,7 +146,7 @@ export function testParseQueryParamsDecodesNamesValuesAndPlus(): none {
 }
 
 export function testQueryParamsConvenienceMethodsRemainLossless(): none {
-  params := try! parseQueryParams("tag=doof&flag&tag=stdlib")
+  params := parseQueryParams("tag=doof&flag&tag=stdlib")!
   firstTag := params.first("tag")
   allTags := params.all("tag")
 
