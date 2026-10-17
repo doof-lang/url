@@ -20,14 +20,14 @@ helpers are intentionally not a full IDNA implementation.
 ```doof
 import { parseAuthority, parsePath, parseQueryParams } from "std/url"
 
-path := try! parsePath("/api//v1/")
+path := parsePath("/api//v1/")!
 // absolute: true
 // segments: ["api", "", "v1", ""]
 
-query := try! parseQueryParams("tag=doof&flag&tag=stdlib")
+query := parseQueryParams("tag=doof&flag&tag=stdlib")!
 // preserves order, duplicate names, and the difference between `flag` and `flag=`
 
-authority := try! parseAuthority("user@example.com:443")
+authority := parseAuthority("user@example.com:443")!
 // userinfo: "user", host: "example.com", port: "443"
 ```
 
@@ -43,10 +43,10 @@ payloads without adding or removing `xn--`. `hostnameToAscii` and
 ```doof
 import { hostnameToAscii, hostnameToUnicode } from "std/url"
 
-ascii := try! hostnameToAscii("例え.テスト")
+ascii := hostnameToAscii("例え.テスト")!
 // "xn--r8jz45g.xn--zckzah"
 
-unicode := try! hostnameToUnicode(ascii)
+unicode := hostnameToUnicode(ascii)!
 // "例え.テスト"
 ```
 

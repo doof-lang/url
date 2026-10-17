@@ -20,17 +20,17 @@ hostname conversion helpers. They deliberately do not implement IDNA or UTS
 ```doof
 import { parseAuthority, parsePath, parseQueryParams } from "std/url"
 
-path := try! parsePath("/api//v1/")
+path := parsePath("/api//v1/")!
 println(path.absolute)        // true
 println(path.segmentCount())  // 4
 println(path.segment(1))      // ""
 
-query := try! parseQueryParams("tag=doof&flag&tag=stdlib")
+query := parseQueryParams("tag=doof&flag&tag=stdlib")!
 println(query.first("tag")!.value!)  // "doof"
 println(query.all("tag").length)     // 2
 println(query.first("flag")!.value)  // null
 
-authority := try! parseAuthority("user%20name@example.com:443")
+authority := parseAuthority("user%20name@example.com:443")!
 println(authority.userinfo!)  // "user name"
 println(authority.host)       // "example.com"
 println(authority.port!)      // "443"
@@ -42,9 +42,9 @@ Each parser accepts only the component it is named for. Do not pass a full URL
 to `parsePath`, `parseAuthority`, or `parseQueryParams`.
 
 ```doof
-path := try! parsePath("/search/results")
-authority := try! parseAuthority("example.com:443")
-query := try! parseQueryParams("q=doof&page=1")
+path := parsePath("/search/results")!
+authority := parseAuthority("example.com:443")!
+query := parseQueryParams("q=doof&page=1")!
 ```
 
 If you are splitting a full URL elsewhere, pass the raw component text without
@@ -70,11 +70,11 @@ not treat `+` specially.
 | query | space | space |
 
 ```doof
-path := try! parsePath("/hello%20world/a+b")
+path := parsePath("/hello%20world/a+b")!
 println(path.segment(0))  // "hello world"
 println(path.segment(1))  // "a+b"
 
-params := try! parseQueryParams("hello+world=one%20two")
+params := parseQueryParams("hello+world=one%20two")!
 println(params.entries[0].name)    // "hello world"
 println(params.entries[0].value!)  // "one two"
 ```
@@ -86,7 +86,7 @@ represented by `absolute`, not by a leading empty segment. Interior and trailing
 empty segments are preserved.
 
 ```doof
-path := try! parsePath("/api//v1/")
+path := parsePath("/api//v1/")!
 
 println(path.absolute)        // true
 println(path.segmentCount())  // 4
@@ -142,7 +142,7 @@ Entries without `=` have `value: null`; entries with `=` preserve an empty
 string value.
 
 ```doof
-params := try! parseQueryParams("tag=doof&flag&tag=stdlib&empty=")
+params := parseQueryParams("tag=doof&flag&tag=stdlib&empty=")!
 
 println(params.size())                // 4
 println(params.first("tag")!.value!)  // "doof"
@@ -208,7 +208,7 @@ Return all entries with the exact decoded name, preserving input order.
 separator is present, so `example.com:` has an empty port.
 
 ```doof
-authority := try! parseAuthority("user%20name:pass@example.com:443")
+authority := parseAuthority("user%20name:pass@example.com:443")!
 
 println(authority.userinfo!)  // "user name:pass"
 println(authority.host)       // "example.com"
