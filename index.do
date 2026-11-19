@@ -54,21 +54,11 @@ export class QueryParams {
   size(): int => this.entries.length
 
   has(name: string): bool {
-    for entry of this.entries {
-      if entry.name == name {
-        return true
-      }
-    }
-    return false
+    return this.entries.some(=> it.name == name)
   }
 
   first(name: string): QueryParam | none {
-    for entry of this.entries {
-      if entry.name == name {
-        return entry
-      }
-    }
-    return none
+    return this.entries.find(=> it.name == name)
   }
 
   all(name: string): readonly QueryParam[] {
